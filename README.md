@@ -49,7 +49,7 @@ To run the codes for help mode
 For LSTM, set bidirectional to False, and BiLSTM set bidirectional to True.
 
 ```
-$ python seq2seq-lstm.py -h
+$ python nmtls-bilstm.py -h
 
 usage: seq2seq-lstm.py [-h] [--clip CLIP] [--mode MODE]
                        [--max_length MAX_LENGTH] [--data_dir DATA_DIR]
