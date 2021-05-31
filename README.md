@@ -51,7 +51,7 @@ For LSTM, set bidirectional to False, and BiLSTM set bidirectional to True.
 ```
 $ python nmtls-bilstm.py -h
 
-usage: seq2seq-lstm.py [-h] [--clip CLIP] [--mode MODE]
+usage: nmtls-bilstm.py [-h] [--clip CLIP] [--mode MODE]
                        [--max_length MAX_LENGTH] [--data_dir DATA_DIR]
                        [--n_epoch N_EPOCH] [--bidirectional BIDIRECTIONAL]
 
