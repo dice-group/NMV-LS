@@ -102,7 +102,7 @@ def create_positional_encoding(max_len, hidden_dim):
     sinusoid_table = np.array([pos / np.power(10000, 2 * i / hidden_dim)
                                for pos in range(max_len) for i in range(hidden_dim)])
     # sinusoid_table = [max len * hidden dim]
-
+    
     sinusoid_table = sinusoid_table.reshape(max_len, -1)
     # sinusoid_table = [max len, hidden dim]
 

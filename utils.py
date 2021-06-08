@@ -161,7 +161,7 @@ def epoch_time(start_time, end_time):
 
     return elapsed_mins, elapsed_secs
 
-
+python -m spacy download en_core_web_sm
 def display_attention(candidate, translation, attention):
     """
     displays the model's attention over the source sentence for each target token generated.

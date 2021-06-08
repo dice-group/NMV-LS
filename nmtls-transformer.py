@@ -16,25 +16,28 @@ from random import shuffle
 import argparse
 import matplotlib.pyplot as plt
 import os.path as path
+import json
 
 import torch
 from torch.autograd import Variable
 import torch.nn as nn
 from torch import optim
 import torch.cuda
+import torch.nn.functional as F
+from torch.nn import TransformerEncoder, TransformerEncoderLayer
+
+
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 from nltk.translate.meteor_score import single_meteor_score 
 from nltk.translate.chrf_score import sentence_chrf
 from tqdm import tqdm
 
-from transformer.transformer import Transformer
-from transformer.optim import ScheduledAdam
-from utils import Params
-
 import nltk
 nltk.download('wordnet')
 
 use_cuda = torch.cuda.is_available()
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 print(use_cuda)
 if torch.cuda.is_available():
     map_location=lambda storage, loc: storage.cuda()
@@ -271,6 +274,132 @@ def indexesFromSentence(lang, sentence, lang_type):
                 indexes.append(lang.word_to_index["<UNK>"])
     return indexes
 
+"""
+Tranformer Model
+"""
+from transformer.attention import MultiHeadAttention
+from transformer.positionwise import PositionWiseFeedForward
+from transformer.ops import create_positional_encoding, create_target_mask, create_position_vector, create_source_mask
+
+class EncoderLayer(nn.Module):
+    def __init__(self, params):
+        super(EncoderLayer, self).__init__()
+        self.layer_norm = nn.LayerNorm(params.hidden_dim, eps=1e-6)
+        self.self_attention = MultiHeadAttention(params)
+        self.position_wise_ffn = PositionWiseFeedForward(params)
+
+    def forward(self, source, source_mask):
+        # source          = [batch size, source length, hidden dim]
+        # source_mask     = [batch size, source length, source length]
+
+        # Original Implementation: LayerNorm(x + SubLayer(x)) -> Updated Implementation: x + SubLayer(LayerNorm(x))
+        normalized_source = self.layer_norm(source)
+        output = source + self.self_attention(normalized_source, normalized_source, normalized_source, source_mask)[0]
+
+        normalized_output = self.layer_norm(output)
+        output = output + self.position_wise_ffn(normalized_output)
+        # output = [batch size, source length, hidden dim]
+
+        return output
+
+
+class Encoder(nn.Module):
+    def __init__(self, params, input_dim, pad_idx):
+        super(Encoder, self).__init__()
+        self.token_embedding = nn.Embedding(input_dim, params.hidden_dim, padding_idx=pad_idx)
+        nn.init.normal_(self.token_embedding.weight, mean=0, std=params.hidden_dim**-0.5)
+        self.embedding_scale = params.hidden_dim ** 0.5
+        x = create_positional_encoding(params.max_len, params.hidden_dim)
+        print("x", x.shape)
+        self.pos_embedding = nn.Embedding.from_pretrained(create_positional_encoding(params.max_len, params.hidden_dim), freeze=True)
+
+        self.encoder_layers = nn.ModuleList([EncoderLayer(params) for _ in range(params.n_layer)])
+        self.dropout = nn.Dropout(params.dropout)
+        self.layer_norm = nn.LayerNorm(params.hidden_dim, eps=1e-6)
+
+    def forward(self, source, input_lang):
+        # source = [batch size, source length]
+        source_mask = create_source_mask(source, input_lang)      # [batch size, source length, source length]
+        source_pos = create_position_vector(source, input_lang)   # [batch size, source length]
+
+        source = self.token_embedding(source) * self.embedding_scale
+        print("source", source.shape)
+        print("source_pos", source_pos.shape)
+        print(self.pos_embedding(source_pos).shape)
+        
+        source = self.dropout(source + self.pos_embedding(source_pos))
+        # source = [batch size, source length, hidden dim]
+
+        for encoder_layer in self.encoder_layers:
+            source = encoder_layer(source, source_mask)
+        # source = [batch size, source length, hidden dim]
+
+        return self.layer_norm(source)
+
+class DecoderLayer(nn.Module):
+    def __init__(self, params):
+        super(DecoderLayer, self).__init__()
+        self.layer_norm = nn.LayerNorm(params.hidden_dim, eps=1e-6)
+        self.self_attention = MultiHeadAttention(params)
+        self.encoder_attention = MultiHeadAttention(params)
+        self.position_wise_ffn = PositionWiseFeedForward(params)
+
+    def forward(self, target, encoder_output, target_mask, dec_enc_mask):
+        # target          = [batch size, target length, hidden dim]
+        # encoder_output  = [batch size, source length, hidden dim]
+        # target_mask     = [batch size, target length, target length]
+        # dec_enc_mask    = [batch size, target length, source length]
+
+        # Original Implementation: LayerNorm(x + SubLayer(x)) -> Updated Implementation: x + SubLayer(LayerNorm(x))
+        norm_target = self.layer_norm(target)
+        output = target + self.self_attention(norm_target, norm_target, norm_target, target_mask)[0]
+
+        # In Decoder stack, query is the output from below layer and key & value are the output from the Encoder
+        norm_output = self.layer_norm(output)
+        sub_layer, attn_map = self.encoder_attention(norm_output, encoder_output, encoder_output, dec_enc_mask)
+        output = output + sub_layer
+
+        norm_output = self.layer_norm(output)
+        output = output + self.position_wise_ffn(norm_output)
+        # output = [batch size, target length, hidden dim]
+
+        return output, attn_map
+
+
+class Decoder(nn.Module):
+    def __init__(self, params, output_dim, pad_idx):
+        super(Decoder, self).__init__()
+        self.token_embedding = nn.Embedding(output_dim, params.hidden_dim, padding_idx=pad_idx)
+        nn.init.normal_(self.token_embedding.weight, mean=0, std=params.hidden_dim**-0.5)
+        self.embedding_scale = params.hidden_dim ** 0.5
+        self.pos_embedding = nn.Embedding.from_pretrained(
+            create_positional_encoding(params.max_len+1, params.hidden_dim), freeze=True)
+
+        self.decoder_layers = nn.ModuleList([DecoderLayer(params) for _ in range(params.n_layer)])
+        self.dropout = nn.Dropout(params.dropout)
+        self.layer_norm = nn.LayerNorm(params.hidden_dim, eps=1e-6)
+
+    def forward(self, target, source, encoder_output):
+        # target              = [batch size, target length]
+        # source              = [batch size, source length]
+        # encoder_output      = [batch size, source length, hidden dim]
+        target_mask, dec_enc_mask = create_target_mask(source, target)
+        # target_mask / dec_enc_mask  = [batch size, target length, target/source length]
+        target_pos = create_position_vector(target)  # [batch size, target length]
+
+        target = self.token_embedding(target) * self.embedding_scale
+        target = self.dropout(target + self.pos_embedding(target_pos))
+        # target = [batch size, target length, hidden dim]
+
+        for decoder_layer in self.decoder_layers:
+            target, attention_map = decoder_layer(target, encoder_output, target_mask, dec_enc_mask)
+        # target = [batch size, target length, hidden dim]
+
+        target = self.layer_norm(target)
+        output = torch.matmul(target, self.token_embedding.weight.transpose(0, 1))
+        # output = [batch size, target length, output dim]
+        return output, attention_map
+
 
 def tensorFromSentence(lang, sentence, lang_type):
     indexes = indexesFromSentence(lang, sentence, lang_type)
@@ -305,7 +434,7 @@ def batchify(data, input_lang, output_lang, batch_size, shuffle_data=True):
     longest_elements = list(range(number_of_batches))
     print('number of batch', number_of_batches)
     for batch_number in range(number_of_batches):
-        #print('batch_number', batch_number)
+        #print('batch_number', batch_number)Dear reviewers,
         longest_input = 0
         longest_target = 0
         input_variables = list(range(batch_size))
@@ -332,31 +461,47 @@ def pad_batch(batch):
 '''Performs training on a single batch of training data. Computing the loss 
 according to the passed loss_criterion and back-propagating on this loss.'''
 
-def train_batch(input_batch, target_batch, model, optimizer, criterion, input_lang, output_lang, params):
-    optimizer.zero_grad()
+def train_batch(input_batch, target_batch, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion, input_lang, output_lang, params):
+    encoder_optimizer.zero_grad()
+    decoder_optimizer.zero_grad()
     loss = 0
-    source = input_batch
-    target = target_batch
-
+    #source = input_batch
+    #target = target_batch
+    #print("source", source.shape)
+    #print("target", target.shape)
+    #src_mask = model.generate_square_subsequent_mask(source.shape[1]).to(device)
+    #for i in range(target.shape[0]):
+    #    pred = model(source[i], src_mask)
+    #    print("source[i]", source[i].shape)
+    #    print("pred", pred.shape)
+    #    print("target[i]", target[i].shape)
+    #    loss += criterion(pred,target[i])
+    
     # target sentence consists of <sos> and following tokens (except the <eos> token)
-    output = model(source, target[:, :-1], input_lang, output_lang)[0]
+    encoder_output = encoder(input_batch, input_lang)                            # [batch size, source length, hidden dim]
+    output, attn_map = decoder(target_batch, input_batch, encoder_output)
+    #output = self.model(source, target[:, :-1])[0]
 
-    # ground truth sentence consists of tokens and <eos> token (except the <sos> token)
+    # ground truth sentence consists of x = create_positional_encoding(params.max_len+1, params.hidden_dim)tokens and <eos> token (except the <sos> token)
     output = output.contiguous().view(-1, output.shape[-1])
-    target = target[:, 1:].contiguous().view(-1)
+    target = target_batch[:, 1:].contiguous().view(-1)
     # output = [(batch size * target length - 1), output dim]
     # target = [(batch size * target length - 1)]
     loss = criterion(output, target)
     loss.backward()
+
+    # clip the gradients to prevent the model from exploding gradient
+    torch.nn.utils.clip_grad_norm_(encoder.parameters(), params.clip)
+    torch.nn.utils.clip_grad_norm_(decoder.parameters(), params.clip)
     
-    torch.nn.utils.clip_grad_norm_(model.parameters(), params.clip)
-    optimizer.step()
+    encoder_optimizer.step()
+    decoder_optimizer.step()
     
     return loss.item() / target_batch.shape[0]
 
 '''Performs a complete epoch of training through all of the training_batches'''
 
-def train(train_batches, model, optimizer, criterion, input_lang, output_lang, params):
+def train(train_batches, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion, input_lang, output_lang, params):
 
     round_loss = 0
     i = 1
@@ -364,7 +509,7 @@ def train(train_batches, model, optimizer, criterion, input_lang, output_lang, p
         #print("Batch ke", i)
         i += 1
         (input_batch, target_batch) = pad_batch(batch)
-        batch_loss = train_batch(input_batch, target_batch, model, optimizer, criterion, input_lang, output_lang, params)
+        batch_loss = train_batch(input_batch, target_batch, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion, input_lang, output_lang, params)
         round_loss += batch_loss
 
     return round_loss / len(train_batches)
@@ -460,7 +605,7 @@ def evaluated(encoder, decoder, sentence, cutoff_length, input_lang, output_lang
 
 def evaluate_randomly(encoder, decoder, pairs, create_txt, print_to, input_lang, output_lang, mode, n=2, trim=100):
     if mode=="test":
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        
         checkpoint_encoder = torch.load("model_enc_weights.pt", map_location=map_location)
         encoder.load_state_dict(checkpoint_encoder)
         encoder.to(device)
@@ -585,7 +730,8 @@ def showPlot(epochs, losses, fig_name):
     plt.savefig(fig_name+'.png')
     plt.close('all')
     
-'''prints the current memory consumption'''
+'''prints the current memory c
+onsumption'''
 def mem():
 	if use_cuda:
 		mem = torch.cuda.memory_allocated()/1e7
@@ -608,7 +754,7 @@ def asHours(s):
 a png graph. Also can save the weights of both the Encoder and Decoder 
 for future use.'''
 
-def train_and_test(epochs, val_eval_every, plot_every, learning_rate, lr_schedule, train_pairs, val_pairs, input_lang, output_lang, batch_size, val_batch_size, model, params, trim, save_weights, create_txt, print_to, output_file_name):
+def train_and_test(epochs, val_eval_every, plot_every, learning_rate, lr_schedule, train_pairs, val_pairs, input_lang, output_lang, batch_size, val_batch_size, encoder, decoder, trim, save_weights, create_txt, print_to, output_file_name, params):
     times = []
     arEpochs = []
     losses = {'Training set':[], 'Validation set': []}
@@ -619,26 +765,22 @@ def train_and_test(epochs, val_eval_every, plot_every, learning_rate, lr_schedul
                                               shuffle_data=False)
     start = time.time()
     print('start', start)
-    
-    
-    # Scheduling Optimzer
-    optimizer = ScheduledAdam(
-            optim.Adam(model.parameters(), betas=(0.9, 0.98), eps=1e-9),
-            hidden_dim=params.hidden_dim,
-            warm_steps=params.warm_steps
-    )
-    criterion = nn.CrossEntropyLoss(ignore_index=params.pad_idx)
-    criterion.to(params.device)
+    criterion = nn.CrossEntropyLoss()
+    lr = 5.0 # learning rate
+    encoder_optimizer = torch.optim.SGD(encoder.parameters(), lr=lr)
+    decoder_optimizer = torch.optim.SGD(decoder.parameters(), lr=lr)
+    #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1.0, gamma=0.95)
     
     for i in range(1,epochs+1):
         arEpochs.append(i)
         print('epoch', i)
-        model.train()
+        encoder.train()
+        decoder.train()
         batches, longest_seq, n_o_b = batchify(train_pairs, input_lang, 
                                            output_lang, batch_size, 
                                            shuffle_data=True)
         print("train_batches")
-        train_loss = train(batches, model, optimizer, criterion, input_lang, output_lang, params)
+        train_loss = train(batches, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion, input_lang, output_lang, params)
 		
         now = time.time()
         print("Iter: %s \nLearning Rate: %s \nTime: %s \nTrain Loss: %s \n" % (i, learning_rate, asHours(now-start), train_loss))
@@ -646,6 +788,7 @@ def train_and_test(epochs, val_eval_every, plot_every, learning_rate, lr_schedul
         if create_txt:
             with open(print_to, 'a') as f:
                 f.write("Iter: %s \nLeaning Rate: %s \nTime: %s \nTrain Loss: %s \n" % (i, learning_rate, asHours(now-start), train_loss))
+
 
         if i % val_eval_every == 0:
             if val_pairs:
@@ -666,6 +809,31 @@ def train_and_test(epochs, val_eval_every, plot_every, learning_rate, lr_schedul
                 torch.save(encoder.state_dict(), output_file_name+'_enc_weights.pt')
                 torch.save(decoder.state_dict(), output_file_name+'_dec_weights.pt')
 
+class Params:
+    """
+    Class that loads hyperparameters from a json file
+    Example:
+    ```
+    params = Params(json_path)
+    print(params.learning_rate)
+    params.learning_rate = 0.5  # change the value of learning_rate in params
+    ```
+    """
+
+    def __init__(self, json_path):
+        self.update(json_path)
+
+    def update(self, json_path):
+        """Loads parameters from json file"""
+        with open(json_path) as f:
+            params = json.load(f)
+            self.__dict__.update(params)
+            # add device information to the the params
+            device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+            # add <sos> and <eos> tokens' indices used to predict the target sentence
+            params = {'device': device}
+            self.__dict__.update(params)
 
 def main(clip, mode, max_length, data_dir, n_epoch, bidirectional):
     create_txt=True
@@ -702,18 +870,6 @@ def main(clip, mode, max_length, data_dir, n_epoch, bidirectional):
     
     """HYPERPARAMETERS: FEEL FREE TO PLAY WITH THESE TO TRY TO ACHIEVE BETTER RESULTS"""
     
-    """signifies whether the Encoder and Decoder should be bidirectional LSTMs or not"""
-    bidirectional = bidirectional
-    
-    """number of layers in both the Encoder and Decoder"""
-    layers = 2
-    
-    """Hidden size of the Encoder and Decoder"""
-    hidden_size = 256
-    
-    """Dropout value for Encoder and Decoder"""
-    dropout = 0.1
-    
     """Training set batch size"""
     batch_size = 128
     
@@ -725,6 +881,7 @@ def main(clip, mode, max_length, data_dir, n_epoch, bidirectional):
     
     """Initial learning rate"""
     learning_rate= 0.1
+    
     
     """Learning rate schedule. Signifies by what factor to divide the learning rate
     at a certain epoch. For example {5:10} would divide the learning rate by 10
@@ -740,15 +897,19 @@ def main(clip, mode, max_length, data_dir, n_epoch, bidirectional):
     		f.write(mem())
     
     print_to=print_to
+    params = Params('config/params.json')
+    
     """create the Encoder"""
-    params = Params('config/params.json', input_lang, output_lang)
-    model= Transformer(params)
-    model.to(params.device)
+    encoder = Encoder(params, input_lang.vocab_size, input_lang.word_to_index.get("<pad>"))
+    
+    """create the Decoder"""
+    decoder = Decoder(params, output_lang.vocab_size, input_lang.word_to_index.get("<pad>"))
     
     print('Model Created')
     if use_cuda:
-    	print('Cuda being used')
-    	model = model.cuda()
+        print('Cuda being used')
+        encoder = encoder.cuda()
+        decoder = decoder.cuda()
     
     print('Number of epochs: '+str(epochs))
     
@@ -761,7 +922,7 @@ def main(clip, mode, max_length, data_dir, n_epoch, bidirectional):
     if mode=="train" or mode=="all":
         train_and_test(epochs, test_eval_every, plot_every, learning_rate, lr_schedule, 
                    train_pairs, test_pairs, input_lang, output_lang, batch_size, 
-                   test_batch_size, model, params, trim, save_weights, create_txt, print_to, output_file_name)
+                   test_batch_size, encoder, decoder, trim, save_weights, create_txt, print_to, output_file_name, params)
     
     if mode=="test" or mode=="all":
         evaluate_randomly(model, test_pairs, create_txt, print_to, input_lang, output_lang, "test", len(test_pairs), trim)

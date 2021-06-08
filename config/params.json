@@ -12,10 +12,10 @@
     "num_epoch": 500,
     "warm_steps": 4000,
 
-    "hidden_dim": 512,
+    "hidden_dim": 20,
     "feed_forward_dim": 2048,
-    "n_layer": 6,
-    "n_head": 8,
-    "max_len": 64,
+    "n_layer": 2,
+    "n_head": 2,
+    "max_len": 30,
     "dropout": 0.1
 }
