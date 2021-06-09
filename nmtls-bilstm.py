@@ -535,55 +535,6 @@ def evaluated(encoder, decoder, sentence, cutoff_length, input_lang, output_lang
         for di in range(cutoff_length):
             #print(di)
             ##print(cutoff_length)Dear reviewers,
-Thank you for your useful and insightful feedback on our work. Please find the answers to your questions as well as pointers to changes made to the paper in the following.
-
-REVIEW 1
-
-1. ESBM dataset
-
-Although your statements are pertinent, ESBM is the largest available benchmark for intrinsic evaluation of entity summarization and the most used in all state-of-the-art papers. Please take a look at a recent survey [1].  
-
-[1] - Liu, Q., Cheng, G., Gunaratna, K., & Qu, Y. (2021). Entity summarization: State of the art and future challenges. Journal of Web Semantics, 100647.
-  
-2. NDCG scores. 
-
-Our focus was to compare F-measures between existing works. However, we will provide NDCG scores in the experimental results part of the final version of the paper. 
-
-3. Quantitative and Qualitative results. 
-
-We assumed that by achieving good quantitative results on ESBM which was manually created containing several types of summarization, we reach good qualitative results as well. However, we will take the reviewer’s comment into consideration in future work.
-  
-4. Enterprise Knowledge Graphs. 
-
-Currently, GATES focuses on generating entity summaries on general-purpose. GATES can be implemented on a specific domain, such as an enterprise knowledge graph. To this end, pre-trained models must be generated from the enterprise knowledge graph (dataset) to support knowledge graph embedding and text embedding, respectively. Subsequently, GATES will be trained using the dataset before it can be used to predict summaries in the related domain. Furthermore, In the conclusion part of our paper (page 13), we plan to extend GATES so that it can be applied on specific domain datasets, such as BioASQ.
-
-5. Tf-idf and other predicate rankings. 
-
-In this work, we only exploited the tf-idf method to calculate weight on predicates. We plan to investigate more ranking methods such as LexRank in future work.    
-
-
-REVIEW 2
-1.  GATES paper is not enough innovative material IMHO. It seems that the approach is a combination of existing techniques.
-
-As we mentioned in the introduction of the GATES paper (page 2), none of the current approaches exploits adjacency information in knowledge graph explicitly. We hence demonstrated that including more structure information into the entity summarization process can lead to better entity summaries. Therefore, the GATES paper showed that the authors of previous state-of-the-art approaches were mistaken when affirming that graph structure would not support improving the summaries. GATES leverages Graph Attention Networks to exploit information from both (1) triple and (2) the topology of knowledge graphs, and finally generate entity summaries. Additionally, to the best of our knowledge, GATES is the first that introduces graph-based neural networks on entity summarization tasks. 
-
-2. The paper has several formal issues. 
-
-
-We will revise the definition of the KG in the final version of the paper accordingly. 
-
-REVIEW 3
-
-1. Unclear problem definition and doubts on Semantic Web foundations and Entity Summarization task.
-
-We defined the research problem following the literature and previous papers. Also, the problem definition does not seem to be a problem for the other reviewers. However, we will add the information pertaining to how to determine if a summary is good or bad, although it is wide-spread in the community (via F-measure), [1].
-
-Regarding the doubts on CBD, we invite the reviewer to read the book [2]. Also, for understanding the entity summarization task, we also invite the reviewer to read the recent published survey [1]
-
-
-References:
-[1]Liu, Q., Cheng, G., Gunaratna, K., & Qu, Y. (2021). Entity summarization: State of the art and future challenges. Journal of Web Semantics, 100647.
-[2] Hitzler, Pascal, Markus Krotzsch, and Sebastian Rudolph. Foundations of semantic web technologies. CRC press, 2009.
             pred, dec_outputs = decoder(decoder_input, dec_h_hidden, dec_c_hidden, enc_hiddens)
             #print(pred)
             topv, topi = pred.topk(1,dim=1)
@@ -627,10 +578,10 @@ def evaluate_randomly(encoder, decoder, pairs, create_txt, print_to, input_lang,
     chrf_highest_score = 0
     chrf_lowest_score = 0
     with open("prediction_output.txt", 'w+') as f_pred:
-      f_pred.write("generate prediction output \n")
+      f_pred.write("")
 
     with open("target.txt", 'w+') as f_target:
-      f_target.write("generate target \n")
+      f_target.write("")
 
     with open("test_output.txt", "w", encoding="utf-8") as f_out:
         for i in tqdm(range(n)):
@@ -766,6 +717,8 @@ def train_and_test(epochs, val_eval_every, plot_every, learning_rate, lr_schedul
                                               shuffle_data=False)
     start = time.time()
     print('start', start)
+    with open("training_loss_log.csv", 'w+') as f_loss:
+      f_loss.write("Train Set \t Validation Set \n")
     for i in range(1,epochs+1):
         arEpochs.append(i)
         print('epoch', i)
@@ -807,6 +760,8 @@ def train_and_test(epochs, val_eval_every, plot_every, learning_rate, lr_schedul
             losses['Training set'].append(train_loss)
             if val_pairs:
                 losses['Validation set'].append(val_loss)
+            with open("training_loss_log.csv", 'a') as f_loss:
+              f_loss.write("{} \t {} \n".format(train_loss, val_loss))
             showPlot(arEpochs, losses, output_file_name)
             if save_weights:
                 torch.save(encoder.state_dict(), output_file_name+'_enc_weights.pt')
@@ -870,7 +825,7 @@ def main(clip, mode, max_length, data_dir, n_epoch, bidirectional):
     epochs = n_epoch
     
     """Initial learning rate"""
-    learning_rate= 0.1
+    learning_rate= 1
     
     """Learning rate schedule. Signifies by what factor to divide the learning rate
     at a certain epoch. For example {5:10} would divide the learning rate by 10

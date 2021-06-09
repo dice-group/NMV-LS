@@ -252,10 +252,10 @@ def evaluateRandomly(encoder, decoder, pairs, input_lang, output_lang, max_lengt
     chrf_highest_score = 0
     chrf_lowest_score = 0
     with open("prediction_output.txt", 'w+') as f_pred:
-      f_pred.write("generate prediction output \n")
+      f_pred.write("")
 
     with open("target.txt", 'w+') as f_target:
-      f_target.write("generate target \n")
+      f_target.write("")
 
     with open("test_output.txt", "w", encoding="utf-8") as f:
         for i in tqdm(range(n)):
