@@ -36,10 +36,10 @@ optional arguments:
 
 ```
 
-To run the codes for training mode
+To run the codes for all mode (training and test)
 
 ```
-$ python main.py --directory data/107K/ --max_length 107 --mode all --n_epoch 100
+$ python main.py --directory data/en_121K/ --max_length 107 --mode all --n_epoch 100
 
 ```
 ## LSTM/BiLSTM Model
@@ -69,7 +69,7 @@ optional arguments:
                         Bidirectional
 
 ```
-To run the codes for training and testing also
+To run the codes for all mode (training and test) also
 ```
-python seq2seq-lstm.py --data_dir data/107K/ --max_length 187 --mode all --n_epoch 100 --bidirectional True
+python seq2seq-lstm.py --data_dir data/en_121K/ --max_length 107 --mode all --n_epoch 100 --bidirectional True
 ```
