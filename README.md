@@ -71,5 +71,33 @@ optional arguments:
 ```
 To run the codes for all mode (training and test) also
 ```
-python seq2seq-lstm.py --data_dir data/en_121K/ --max_length 107 --mode all --n_epoch 100 --bidirectional True
+python nmtls-bilstm.py --data_dir data/en_121K/ --max_length 107 --mode all --n_epoch 100 --bidirectional True
+```
+
+## Transformer Model
+
+To know how to run the code, you can execute a syntax as below:
+```
+$ python nmtls-transformer.py -h
+usage: nmtls-transformer.py [-h] [--mode MODE] [--max_length MAX_LENGTH]
+                            [--directory DIRECTORY] [--n_epoch N_EPOCH]
+                            [--batch_size BATCH_SIZE]
+
+Neural Machine Translation Link Specification (NMTLS)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --mode MODE           Mode: train/test
+  --max_length MAX_LENGTH
+                        Max length
+  --directory DIRECTORY
+                        Directory of dataset
+  --n_epoch N_EPOCH     n Epoch
+  --batch_size BATCH_SIZE
+                        Batch size
+
+```
+To run the code in all mode (training and testing)
+```
+$ python nmtls-transformer.py --directory /content/gdrive/MyDrive/nmtls-transformer/data/121k/ --max_length 107 --mode all --n_epoch 30 --batch_size=128
 ```
