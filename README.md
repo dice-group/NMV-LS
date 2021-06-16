@@ -99,5 +99,5 @@ optional arguments:
 ```
 To run the code in all mode (training and testing)
 ```
-$ python nmtls-transformer.py --directory /content/gdrive/MyDrive/nmtls-transformer/data/121k/ --max_length 107 --mode all --n_epoch 30 --batch_size=128
+$ python nmtls-transformer.py --directory data/121k/ --max_length 107 --mode all --n_epoch 30 --batch_size=128
 ```
