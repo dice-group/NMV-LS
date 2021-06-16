@@ -49,7 +49,7 @@ def unicodeToAscii(s):
     )
 
 def normalizeString(s):
-    s = s.lower().strip()
+    #s = s.lower().strip()
     #s = re.split(r'[(|,)]', s)
     #s = re.sub(r"[^a-zA-Z.!?]+", r" ", s)
     return s

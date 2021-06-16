@@ -48,7 +48,7 @@ def tokenize_target(text):
     return text.split(' ')
 
 class PositionalEncoding(nn.Module):
-    def __init__(self, d_model, dropout=0.1, max_len=107):
+    def __init__(self, d_model, max_len=107, dropout=0.1):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
         self.d_model = d_model
