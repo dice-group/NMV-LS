@@ -1,0 +1,201 @@
+Starting Training 
+Iter: 0 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 272.43933292388914 
+Validation Loss: 138.90848183958497 
+Iter: 1 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 137.198175239563 
+Validation Loss: 75.47672604639236 
+Iter: 2 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 85.90263702392578 
+Validation Loss: 54.72756319738414 
+Iter: 3 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 65.7826204109192 
+Validation Loss: 44.90397322288931 
+Iter: 4 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 55.79648155212402 
+Validation Loss: 39.25534718820494 
+Iter: 5 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 49.03340773582458 
+Validation Loss: 36.156870095370564 
+Iter: 6 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 43.76186230659485 
+Validation Loss: 34.35944726996226 
+Iter: 7 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 39.489074840545655 
+Validation Loss: 32.68498775247025 
+Iter: 8 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 35.73968895912171 
+Validation Loss: 29.690536593084467 
+Iter: 9 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 32.28598874092102 
+Validation Loss: 26.63406774873603 
+Iter: 10 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 29.200153608322143 
+Validation Loss: 23.129014365901686 
+Iter: 11 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 26.448624200820923 
+Validation Loss: 19.956611523693557 
+Iter: 12 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 23.89132688045502 
+Validation Loss: 16.519581755220074 
+Iter: 13 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 21.669779233932495 
+Validation Loss: 14.273104660543677 
+Iter: 14 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 19.676874437332152 
+Validation Loss: 12.277265674855611 
+Iter: 15 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 17.9385756111145 
+Validation Loss: 11.116159416077888 
+Iter: 16 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 16.403387470245363 
+Validation Loss: 9.972205520288584 
+Iter: 17 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 14.997609477043152 
+Validation Loss: 9.131169119877358 
+Iter: 18 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 13.744415040016174 
+Validation Loss: 8.413021083123063 
+Iter: 19 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 12.620901114940644 
+Validation Loss: 7.842451134360816 
+Iter: 20 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 11.63530758857727 
+Validation Loss: 7.320903581409421 
+Iter: 21 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 10.720802118778229 
+Validation Loss: 6.980390114931211 
+Iter: 22 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 9.909979712963104 
+Validation Loss: 6.502047802085338 
+Iter: 23 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 9.148411841392518 
+Validation Loss: 6.309328034156806 
+Iter: 24 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 8.473937022686005 
+Validation Loss: 6.0491470303682435 
+Iter: 25 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 7.858394622802734 
+Validation Loss: 5.811481877193875 
+Iter: 26 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 7.285061838626862 
+Validation Loss: 5.833110218442058 
+Iter: 27 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 6.780442597866059 
+Validation Loss: 5.6017931400474215 
+Iter: 28 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 6.31016095995903 
+Validation Loss: 5.453244661211151 
+Iter: 29 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 5.882584164142608 
+Validation Loss: 5.37712083921755 
+Iter: 30 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 5.50247568488121 
+Validation Loss: 5.302512326492635 
+Iter: 31 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 5.14200556397438 
+Validation Loss: 5.445424140730541 
+Iter: 32 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 4.814012269973755 
+Validation Loss: 5.351923768791332 
+Iter: 33 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 4.528233544826508 
+Validation Loss: 5.479711399570312 
+Iter: 34 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 4.25447982788086 
+Validation Loss: 5.41784981114152 
+Iter: 35 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 4.00553985118866 
+Validation Loss: 5.570058145416926 
+Iter: 36 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 3.7794136583805082 
+Validation Loss: 5.46398604904901 
+Iter: 37 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 3.571254515647888 
+Validation Loss: 5.404783912529174 
+Iter: 38 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 3.380223647356033 
+Validation Loss: 5.579761807686866 
+Iter: 39 
+Leaning Rate: 1e-06 
+Time: -1h 59m 59s 
+Train Loss: 3.20943325817585 
+Validation Loss: 5.674457467450977 

@@ -1,0 +1,51 @@
+Starting Training 
+Iter: 100 
+Leaning Rate: 0.01 
+Time: -1h 59m 59s 
+Train Loss: 0.867064236650213 
+Test Loss: 0.8082468638906667 
+Iter: 200 
+Leaning Rate: 0.01 
+Time: -1h 59m 59s 
+Train Loss: 0.5060728225617586 
+Test Loss: 0.500752369913045 
+Iter: 300 
+Leaning Rate: 0.01 
+Time: -1h 59m 59s 
+Train Loss: 0.471953464391695 
+Test Loss: 0.4772217066298605 
+Iter: 400 
+Leaning Rate: 0.01 
+Time: -1h 59m 59s 
+Train Loss: 0.4452669170530818 
+Test Loss: 0.45641855701714207 
+Iter: 500 
+Leaning Rate: 0.01 
+Time: -1h 59m 59s 
+Train Loss: 0.4498424520768707 
+Test Loss: 0.45258802395296494 
+Iter: 600 
+Leaning Rate: 0.01 
+Time: -1h 59m 59s 
+Train Loss: 0.44574127321213736 
+Test Loss: 0.43603278183949234 
+Iter: 700 
+Leaning Rate: 0.01 
+Time: -1h 59m 59s 
+Train Loss: 0.4253702302156133 
+Test Loss: 0.4280148470591489 
+Iter: 800 
+Leaning Rate: 0.01 
+Time: -1h 59m 59s 
+Train Loss: 0.4151799156401726 
+Test Loss: 0.4120202632440547 
+Iter: 900 
+Leaning Rate: 0.01 
+Time: -1h 59m 59s 
+Train Loss: 0.421493016125672 
+Test Loss: 0.4035007500692898 
+Iter: 1000 
+Leaning Rate: 0.01 
+Time: -1h 59m 59s 
+Train Loss: 0.4026102324187129 
+Test Loss: 0.41462707228634493 
