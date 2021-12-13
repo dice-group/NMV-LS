@@ -1,12 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Mar 10 16:01:12 2021
-
-@author: asep
-"""
-
-## read dataset
 import argparse
 import torch
 

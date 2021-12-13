@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Mar 10 16:53:05 2021
 
-@author: asep
-"""
 import unicodedata
 import re
 import matplotlib.pyplot as plt
@@ -64,6 +60,7 @@ def sourceNormalization(ls_source):
     return word_list
 
 def indexesFromSentence(lang, sentence, lang_type):
+    sentence = sentence.strip()
     if lang_type=="ls_source":
         indexes = []
         words =  sourceNormalization(sentence)

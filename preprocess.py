@@ -30,7 +30,7 @@ def filterPairs(pairs, max_length):
     for pair in pairs:
         source = sourceNormalization(pair[0])
         target = pair[1].split(' ')
-        if len(source) < max_length and len(target)<max_length:
+        if len(source) <= max_length and len(target)<=max_length:
             filtered_pairs.append(pair)
     return filtered_pairs
 
@@ -60,25 +60,25 @@ def loadDataset(lang1, lang2, dir_data):
     for data in train:
         pair = []
         pair.append(normalizeString(data[0]))
-        pair.append(normalizeString(data[1]))
+        pair.append(normalizeString(data[1].strip()))
         train_pairs.append(pair)
     
     for data in test:
         pair = []
         pair.append(normalizeString(data[0]))
-        pair.append(normalizeString(data[1]))
+        pair.append(normalizeString(data[1].strip()))
         test_pairs.append(pair)
         
     for data in dev:
         pair = []
         pair.append(normalizeString(data[0]))
-        pair.append(normalizeString(data[1]))
+        pair.append(normalizeString(data[1].strip()))
         dev_pairs.append(pair)
             
     input_lang = Lang(lang1)
     output_lang = Lang(lang2)       
     return input_lang, output_lang, train_pairs, test_pairs, dev_pairs  
-  
+
 def getMaxLength(pairs):
     sources = []
     targets = []

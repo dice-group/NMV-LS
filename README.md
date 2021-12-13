@@ -1,4 +1,6 @@
-# Neural Machine Translation Link Specification (NMTLS)
+# NMV-LS: Multilingual Neural Machine Verbalization of Link Specifications for The Explainable Integration of Knowledge Graphs
+
+NMV-LS is a multilingual neural machine verbalization approach for translating complex link specifications into natural language.
 
 ## Environment and Dependencies
 
@@ -7,97 +9,47 @@ Ubuntu 10.04.2 LTS
 python 3.6+
 torch 1.7.0
 ```
-## Dataset
-You can find in the data folder. unzip all of zip files.
+## Datasets
+There are three different datasets with following size:
+1. 107k of pairs (English) 
+2. 1m of pairs (English)
+3. 73k of pairs (German)
 
+We provide splitted dataset of each dataset in the data folder. Unzip all of zip files, which are each of dataset consists of train, dev, and test sets.
 
-## GRU Model
-
-To run the codes for help mode
-
+## Installation
+Download NVM-LS repository:
 ```
-$ python main.py -h
-
-usage: main.py [-h] [--directory DIRECTORY] [--mode MODE]
-               [--max_length MAX_LENGTH] [--model MODEL] [--n_epoch N_EPOCH]
-
-Neural Machine Translation Link Specification (NMTLS)
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --directory DIRECTORY
-                        Data Directory
-  --mode MODE           Mode operations: train, test, and all
-  --max_length MAX_LENGTH
-                        Msx length
-  --model MODEL         Model: gru/lstm
-  --n_epoch N_EPOCH     N epochs
-
-
+git clone https://github.com/dice-group/GATES.git
+```
+Install dependencies:
+```
+pip install -r requirements.txt
 ```
 
-To run the codes for all mode (training and test)
-
+## Usage
+### Configuration
 ```
-$ python main.py --directory data/en_121K/ --max_length 107 --mode all --n_epoch 100
-
+mode: all		# Mode all denotes that you will execute the code on training and testing consecutively. You can choose train or test mode if you want to run separately.
+max_length: 107		# The max length of sentence is 107
+directory: data/107K/	# Directory denotes where is the path of splitted dataset (train, dev, and test sets)
+n_epoch: 100		# n epoch shows how many epochs to train the model
+bidirectional: True	# Bidirectional parameter is used for NMV-LS with Bi/LSTM model. If the value of bidirectional is true that shows BiLSTM model is used on training the model.
 ```
-## LSTM/BiLSTM Model
-
-To run the codes for help mode
-
-For LSTM, set bidirectional to False, and BiLSTM set bidirectional to True.
-
+### NMV-LS with GRU
+To run NMV-LS with GRU model 
 ```
-$ python nmtls-bilstm.py -h
-
-usage: nmtls-bilstm.py [-h] [--clip CLIP] [--mode MODE]
-                       [--max_length MAX_LENGTH] [--data_dir DATA_DIR]
-                       [--n_epoch N_EPOCH] [--bidirectional BIDIRECTIONAL]
-
-Neural Machine Translation Link Specification (NMTLS)
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --clip CLIP           gradient clipping
-  --mode MODE           Mode: train/test
-  --max_length MAX_LENGTH
-                        Max length
-  --data_dir DATA_DIR   Directory of dataset
-  --n_epoch N_EPOCH     n Epoch
-  --bidirectional BIDIRECTIONAL
-                        Bidirectional
-
-```
-To run the codes for all mode (training and test) also
-```
-python nmtls-bilstm.py --data_dir data/en_121K/ --max_length 107 --mode all --n_epoch 100 --bidirectional True
+$ python main.py --directory data/107K/ --max_length 107 --mode all --n_epoch 100
 ```
 
-## Transformer Model
-
-To know how to run the code, you can execute a syntax as below:
+### NMV-LS with Bi/LSTM
+To run NMV-LS with BiLSTM model
 ```
-$ python nmtls-transformer.py -h
-usage: nmtls-transformer.py [-h] [--mode MODE] [--max_length MAX_LENGTH]
-                            [--directory DIRECTORY] [--n_epoch N_EPOCH]
-                            [--batch_size BATCH_SIZE]
-
-Neural Machine Translation Link Specification (NMTLS)
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --mode MODE           Mode: train/test
-  --max_length MAX_LENGTH
-                        Max length
-  --directory DIRECTORY
-                        Directory of dataset
-  --n_epoch N_EPOCH     n Epoch
-  --batch_size BATCH_SIZE
-                        Batch size
-
+$ python nmv-ls_bilstm.py --directory data/107K/ --max_length 107 --mode all --n_epoch 100 --bidirectional True
 ```
-To run the code in all mode (training and testing)
+
+### NMV-LS with Transformers
+To run NMV-LS with Transformer model
 ```
-$ python nmtls-transformer.py --directory data/121k/ --max_length 107 --mode all --n_epoch 30 --batch_size=128
+$ python nmv-ls_transformer.py --directory data/107K/ --max_length 107 --mode all --n_epoch 30
 ```

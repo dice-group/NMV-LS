@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Mar 10 23:26:47 2021
 
-@author: Asep Fajar Firmansyah
-"""
 import torch
 import random
 import time
@@ -12,9 +8,6 @@ import math
 import torch.nn as nn
 from torch import optim
 from helpers import tensorsFromPair, timeSince, tensorFromSentence
-from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
-from nltk.translate.meteor_score import single_meteor_score 
-from nltk.translate.chrf_score import sentence_chrf
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 #import visdom
@@ -130,7 +123,6 @@ def trainIters(encoder, decoder, n_iters, train_pairs, dev_pairs, test_pairs, in
 
     now = time.time()
     start = time.time()
-    plot_losses = []
     print_loss_total = 0  # Reset every print_every
     plot_loss_total = 0  # Reset every plot_every
     print_val_loss_total=0
@@ -242,15 +234,6 @@ def evaluateRandomly(encoder, decoder, pairs, input_lang, output_lang, max_lengt
     decoder.load_state_dict(checkpoint_decoder)
     decoder.to(device)
     
-    scores = []
-    meteor_scores = []
-    chrf_scores = []
-    highest_score = 0
-    lowest_score = 0
-    meteor_highest_score = 0
-    meteor_lowest_score = 0
-    chrf_highest_score = 0
-    chrf_lowest_score = 0
     with open("prediction_output.txt", 'w+') as f_pred:
       f_pred.write("")
 
@@ -278,62 +261,6 @@ def evaluateRandomly(encoder, decoder, pairs, input_lang, output_lang, max_lengt
             with open("prediction_output.txt", 'a') as f_pred:
               f_pred.write("{}\n".format(output_sentence))
 
-            ##print('')
-            reference = pair[1].split(' ')
-            candidate = output_words
-            #print('reference', reference)
-            #print('candidate', candidate)
-            smoothie = SmoothingFunction().method4
-            score = sentence_bleu([reference], candidate, smoothing_function=smoothie)
-            meteor_score = round(single_meteor_score(pair[1], output_sentence),4)
-            chrf_score = sentence_chrf(pair[1], candidate)
-            ##print("BLEU Score: ",score)
-            f.write("BLEU SCORE = {}\n".format(score*100))
-            f.write("METEOR SCORE = {}\n".format(meteor_score*100))
-            f.write("ChrF++ SCORE = {}\n".format(chrf_score*100))
-            f.write("\n")
-            scores.append(score)
-            meteor_scores.append(meteor_score)
-            chrf_scores.append(chrf_score)
-            if i==0:
-              highest_score = score
-              lowest_score = score
-              meteor_highest_score = meteor_score
-              meteor_lowest_score = meteor_score
-              chrf_highest_score = chrf_score
-              chrf_lowest_score = chrf_score
-
-            if score > highest_score:
-              highest_score=score
-            if score < lowest_score:
-              lowest_score = score
-            
-            if meteor_score > meteor_highest_score:
-              meteor_highest_score=meteor_score
-            if meteor_score < meteor_lowest_score:
-              meteor_lowest_score = meteor_score
-
-            if chrf_score > chrf_highest_score:
-              chrf_highest_score=chrf_score
-            if chrf_score < chrf_lowest_score:
-              chrf_lowest_score = chrf_score
-
-    
-        avg=(sum(scores)/len(scores))*100
-        meteor_scores_avg = (sum(meteor_scores)/len(meteor_scores))*100
-        chrf_scores_avg = (sum(chrf_scores)/len(chrf_scores))*100
-        highest_score = highest_score*100
-        lowest_score = lowest_score*100
-        meteor_highest_score = meteor_highest_score*100
-        meteor_lowest_score = meteor_lowest_score*100
-        chrf_highest_score = chrf_highest_score*100
-        chrf_lowest_score = chrf_lowest_score*100
-        print("AVG BLEU Score", avg, "Highest", highest_score, "Lowest", lowest_score)
-        print("AVG METEOR Score", meteor_scores_avg, "Highest", meteor_highest_score, "Lowest", meteor_lowest_score)
-        print("AVG ChfF++ Score", chrf_scores_avg, "Highest", chrf_highest_score, "Lowest", chrf_lowest_score)
-        f.write("AVG Bleu Score {} highest {} lowest {}\n".format(avg, highest_score, lowest_score))
-        f.write("AVG METEOR Score {} highest {} lowest {}\n".format(meteor_scores_avg, meteor_highest_score, meteor_lowest_score))
-        f.write("AVG ChrF++ Score {} highest {} lowest {}\n".format(chrf_scores_avg, chrf_highest_score, chrf_lowest_score))
 
 '''Used to plot the progress of training. Plots the loss value vs. time'''
 def showPlot(epochs, losses, fig_name):
