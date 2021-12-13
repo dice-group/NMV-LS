@@ -1,6 +1,0 @@
-Starting Training 
-Iter: 100 
-Leaning Rate: 0.01 
-Time: -1h 59m 59s 
-Train Loss: 0.8657929052415261 
-Test Loss: 0.8231037063341528 
