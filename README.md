@@ -63,3 +63,18 @@ $ python nmv-ls_transformer.py --directory data/107K/ --max_length 107 --mode al
 ```
 ### Few-shot learning using T5 model
 Run [NMVLS_few_shot_learning_using_T5_model.ipynb](https://github.com/u2018/NMV-LS/blob/main/NMVLS_few_shot_learning_using_T5_model.ipynb) on Google colab
+
+## How to Cite
+```bibtex
+@inproceedings{gusmita2023indqner,
+    title = "Explainable Integration of Knowledge Graphs using Large Language Models",
+    author = {Ahmed, Abdullah Fathi  and Firmansyah, Asep Fajar and Sherif, Mohammed Ahmed and Moussallem, Diego and Ngonga Ngomo, Axel-Cyrille},
+    booktitle = "to appear in Proceedings of the 28th International Conference on Applications of Natural Language to Information Systems (NLDB 2023)",
+    year = "2023",
+    address = "Online",
+    publisher = "Springer Link",
+}
+```
+
+## Contact
+If you have any questions or feedbacks, feel free to contact us at asep.fajar.firmansyah@upb.de
