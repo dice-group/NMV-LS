@@ -66,13 +66,12 @@ Run [NMVLS_few_shot_learning_using_T5_model.ipynb](https://github.com/u2018/NMV-
 
 ## How to Cite
 ```bibtex
-@inproceedings{gusmita2023indqner,
-    title = "Explainable Integration of Knowledge Graphs using Large Language Models",
-    author = {Ahmed, Abdullah Fathi  and Firmansyah, Asep Fajar and Sherif, Mohammed Ahmed and Moussallem, Diego and Ngonga Ngomo, Axel-Cyrille},
-    booktitle = "to appear in Proceedings of the 28th International Conference on Applications of Natural Language to Information Systems (NLDB 2023)",
-    year = "2023",
-    address = "Online",
-    publisher = "Springer Link",
+@article{asep2023nmvls,
+  author = {Ahmed, Abdullah Fathi and Firmansyah, Asep Fajar and Sherif, Mohamed Ahmed and Mousallem, Diego and Ngomo, Axel-Cyrille Ngonga},
+  biburl = {https://www.bibsonomy.org/bibtex/24fd6060de085e75628f880e6a316a098/dice-research},
+  title = {Explainable Integration of Knowledge Graphs using Large Language Models},
+  url = {https://svn.dice-research.org/open/papers/2023/NLDB_NMVLS/public.pdf},
+  year = 2023
 }
 ```
 
