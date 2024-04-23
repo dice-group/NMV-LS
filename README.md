@@ -27,7 +27,7 @@ There are four different datasets as follows:
 ## Installation
 Download NVM-LS repository:
 ```
-https://github.com/u2018/NMV-LS-T5.git
+https://github.com/u2018/NMV-LS.git
 ```
 Install dependencies:
 ```
